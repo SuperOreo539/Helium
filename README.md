@@ -1,0 +1,3 @@
+i reverse engineered helium unblocker the browser dose not work properly it uses ultraviolet in its servers to oprate browser the ai dose not work idk why credits to Helium Unblocker and this can be a project for yall to make ur own version of this unblocker apps are easy to add apps and games its in subpages/apps/apps.json Helium unblcoker google docs links https://docs.google.com/document/d/1cF8RptZSBUr0meHorKwTw3tPEYFUueIs0p-qGjxfi3g/edit?tab=t.0
+
+to get ultraviolet go to the ultraviolet github and take the code of the server system u can implment this into that to get the browser to work if not try to find any other solutions that might fix it good luck
