@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex justify-center items-center h-screen">
+    <div class="w-full max-w-md p-6 bg-white shadow-md rounded-lg text-center">
+        <h1 class="text-2xl font-semibold mb-4">Admin Login</h1>
+        <input type="password" id="password" placeholder="Enter password" class="w-full p-2 border border-gray-300 rounded mb-4" aria-label="Password">
+        <button id="loginBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">Login</button>
+        <p id="error" class="text-red-500 mt-2 hidden">Invalid password</p>
+        <div id="connectionStatus" class="text-yellow-500 mt-2 hidden">Connection issue detected...</div>
+    </div>
+
+    <script>
+        async function login() {
+            const password = document.getElementById("password").value;
+            const errorEl = document.getElementById("error");
+            const loginBtn = document.getElementById("loginBtn");
+            const connectionStatus = document.getElementById("connectionStatus");
+
+            // Validate password format before sending
+            if (!password || password.length < 4) {
+                errorEl.textContent = "Password must be at least 4 characters";
+                errorEl.classList.remove("hidden");
+                return;
+            }
+
+            // Disable button and show loading state
+            loginBtn.disabled = true;
+            loginBtn.textContent = "Logging in...";
+            errorEl.classList.add("hidden");
+            connectionStatus.classList.add("hidden");
+
+            try {
+                // Set timeout for the fetch request
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+                const res = await fetch("/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ password }),
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+
+                if (!res.ok) {
+                    throw new Error(`Server responded with ${res.status}`);
+                }
+
+                const data = await res.json();
+                if (data.success) {
+                    window.location.href = "/admin";
+                } else {
+                    errorEl.textContent = data.message || "Invalid password";
+                    errorEl.classList.remove("hidden");
+                }
+            } catch (error) {
+                console.error("Login error:", error);
+                if (error.name === "AbortError") {
+                    connectionStatus.textContent = "Request timed out. Please try again.";
+                    connectionStatus.classList.remove("hidden");
+                } else if (!navigator.onLine) {
+                    connectionStatus.textContent = "You appear to be offline. Please check your connection.";
+                    connectionStatus.classList.remove("hidden");
+                } else {
+                    errorEl.textContent = "Connection error. Please try again.";
+                    errorEl.classList.remove("hidden");
+                }
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = "Login";
+            }
+        }
+
+        // Event listeners
+        document.getElementById("loginBtn").addEventListener("click", login);
+
+        // Add Enter key support
+        document.getElementById("password").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                login();
+            }
+        });
+
+        // Check connection status
+        window.addEventListener('online', function() {
+            document.getElementById("connectionStatus").classList.add("hidden");
+        });
+
+        window.addEventListener('offline', function() {
+            document.getElementById("connectionStatus").textContent = "You are offline. Please check your connection.";
+            document.getElementById("connectionStatus").classList.remove("hidden");
+        });
+    </script>
+</body>
+</html>
